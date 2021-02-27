@@ -105,6 +105,7 @@ class PuppeteerApp:
 
     def update_image(self):
         there_is_frame, frame = self.video_capture.read()
+        # cv2.imwrite("my.png",frame)
         if not there_is_frame:
             return
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -152,7 +153,7 @@ class PuppeteerApp:
             self.current_pose[5] = mouth_normalized_ratio
 
             self.current_pose = self.current_pose.unsqueeze(dim=0)
-
+            # TODO Core of demo, compress this
             posed_image = self.poser.pose(self.source_image, self.current_pose).detach().cpu()
             numpy_image = rgba_to_numpy_image(posed_image[0])
             pil_image = PIL.Image.fromarray(np.uint8(np.rint(numpy_image * 255.0)), mode='RGBA')
@@ -186,15 +187,15 @@ if __name__ == "__main__":
     cuda = torch.device('cuda')
     poser = MorphRotateCombinePoser256Param6(
         morph_module_spec=FaceMorpherSpec(),
-        morph_module_file_name="E:/work/pycharm_v2/talking-head-anime-demo/data/face_morpher.pt",
+        morph_module_file_name="E:/work/pycharm_v2/talking-head-anime-landing/data/face_morpher.pt",
         rotate_module_spec=TwoAlgoFaceRotatorSpec(),
-        rotate_module_file_name="E:/work/pycharm_v2/talking-head-anime-demo/data/two_algo_face_rotator.pt",
+        rotate_module_file_name="E:/work/pycharm_v2/talking-head-anime-landing/data/two_algo_face_rotator.pt",
         combine_module_spec=CombinerSpec(),
-        combine_module_file_name="E:/work/pycharm_v2/talking-head-anime-demo/data/combiner.pt",
+        combine_module_file_name="E:/work/pycharm_v2/talking-head-anime-landing/data/combiner.pt",
         device=cuda)
 
     face_detector = dlib.get_frontal_face_detector()
-    landmark_locator = dlib.shape_predictor("E:/work/pycharm_v2/talking-head-anime-demo/data/shape_predictor_68_face_landmarks.dat")
+    landmark_locator = dlib.shape_predictor("E:/work/pycharm_v2/talking-head-anime-landing/data/shape_predictor_68_face_landmarks.dat")
 
     video_capture = cv2.VideoCapture(0)
 

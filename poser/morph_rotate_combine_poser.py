@@ -94,21 +94,21 @@ class MorphRotateCombinePoser256Param6(MorphRotateCombinePoser):
                  combine_module_file_name: str,
                  device: torch.device):
         super().__init__(
-            morph_module_spec,
+            morph_module_spec,  # network param
             morph_module_file_name,
             [
                 PoseParameter("left_eye", "Left Eye", 0.0, 1.0, 0.0),
                 PoseParameter("right_eye", "Right Eye", 0.0, 1.0, 0.0),
                 PoseParameter("mouth", "Mouth", 0.0, 1.0, 1.0)
             ],
-            rotate_module_spec,
+            rotate_module_spec,  # network param
             rotate_module_file_name,
             [
                 PoseParameter("head_x", "Head X", -1.0, 1.0, 0.0),
                 PoseParameter("head_y", "Head Y", -1.0, 1.0, 0.0),
                 PoseParameter("neck_z", "Neck Z", -1.0, 1.0, 0.0),
             ],
-            combine_module_spec,
+            combine_module_spec,  # network param
             combine_module_file_name,
             256,
             device)
