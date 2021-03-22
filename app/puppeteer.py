@@ -22,6 +22,9 @@ from tha.face_morpher import FaceMorpherSpec
 from tha.two_algo_face_rotator import TwoAlgoFaceRotatorSpec
 from util import rgba_to_numpy_image, extract_pytorch_image_from_filelike
 
+import waifulabs
+import io
+import os
 
 class PuppeteerApp:
     def __init__(self,
@@ -76,6 +79,10 @@ class PuppeteerApp:
                                                command=self.load_image)
         self.load_source_image_button.pack(fill='x')
 
+        self.generate_source_image_button = Button(bottom_frame, text="Generate Image ...", relief=GROOVE,
+                                                   command=self.genereate_image)
+        self.generate_source_image_button.pack(fill='x')
+
         self.pose_size = len(self.poser.pose_parameters())
         self.source_image = None
         self.posed_image = None
@@ -86,13 +93,78 @@ class PuppeteerApp:
 
     def load_image(self):
         file_name = filedialog.askopenfilename(
-            filetypes=[("PNG", '*.png')],
             initialdir="data/illust")
         if len(file_name) > 0:
             self.load_image_from_file(file_name)
 
-    def load_image_from_file(self, file_name):
-        image = PhotoImage(file=file_name)
+    def genereate_image(self):
+        self.load_image_from_file(generate=True)
+
+    @staticmethod
+    def read_image(img_path):
+        return cv2.imread(img_path, cv2.IMREAD_COLOR)
+
+    @staticmethod
+    def generate_waifus(steps=3):
+        waifu = waifulabs.GenerateWaifu()
+        if steps > 1:
+            waifu = waifulabs.GenerateWaifu(seeds=waifu.seeds, step=2)
+        if steps > 2:
+            waifu = waifulabs.GenerateWaifu(seeds=waifu.seeds, step=3)
+        export_waifu = np.array(PIL.Image.open(io.BytesIO(waifu.bytes)))
+        export_waifu = cv2.cvtColor(export_waifu, cv2.COLOR_BGR2RGB)
+        return export_waifu
+
+    @staticmethod
+    def crop_face(image, lbp_path):
+        cascade = cv2.CascadeClassifier(lbp_path)
+        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.equalizeHist(gray)
+
+        faces = cascade.detectMultiScale(gray,
+                                         scaleFactor=1.1,
+                                         minNeighbors=5,
+                                         minSize=(24, 24))
+
+        if len(faces) != 1:
+            raise Exception("{} anime faces identified in the image".format(len(faces)))
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+        new_img = image_rgb[y:y + h, x:x + w]
+
+        return new_img
+
+    @staticmethod
+    def prepare_image(cropped_head):
+        resized_head = PIL.Image.fromarray(cropped_head).resize((128, 128)).convert('RGBA')
+        output_image = PIL.Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        output_image.paste(resized_head, (64, 64))
+        return output_image
+
+    def process_image(self, input="upload", img_path=None, lbp_path='./data/lbpcascade_animeface.xml', steps=3):
+        if input == 'upload':
+            img = self.read_image(img_path)
+        elif input == 'generate':
+            img = self.generate_waifus(steps=steps)
+        else:
+            raise Exception("Unknown input argument")
+
+        cropped_head = self.crop_face(img, lbp_path)
+        resultant_image = self.prepare_image(cropped_head)
+        return resultant_image
+
+    def load_image_from_file(self, file_name=None, generate=False):
+        if generate:
+            image = self.process_image(input="generate")
+        else:
+            image = self.process_image(img_path=file_name)
+
+        image.save('./data/illust/loaded_image.png')
+        image = PhotoImage(file='./data/illust/loaded_image.png')
+
         if image.width() != self.poser.image_size() or image.height() != self.poser.image_size():
             message = "The loaded image has size %dx%d, but we require %dx%d." \
                       % (image.width(), image.height(), self.poser.image_size(), self.poser.image_size())
@@ -101,7 +173,8 @@ class PuppeteerApp:
         self.source_image_label.image = image
         self.source_image_label.pack()
 
-        self.source_image = extract_pytorch_image_from_filelike(file_name).to(self.torch_device).unsqueeze(dim=0)
+        self.source_image = extract_pytorch_image_from_filelike('./data/illust/loaded_image.png').to(self.torch_device).unsqueeze(dim=0)
+        os.remove('./data/illust/loaded_image.png')
 
     def update_image(self):
         there_is_frame, frame = self.video_capture.read()
