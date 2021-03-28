@@ -11,6 +11,10 @@ As with many modern machine learning projects written with PyTorch, this piece o
 
 Also, the peppeteer tool requires a webcam.
 
+## Preprocess Requirements.
+The loaded image should be in the folder /data (?)
+Running it on command line(?)
+
 ## Dependencies
 
 * Python >= 3.6
