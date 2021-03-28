@@ -11,18 +11,19 @@ As with many modern machine learning projects written with PyTorch, this piece o
 
 Also, the peppeteer tool requires a webcam.
 
-## Preprocess Requirements.
+## Preprocessing Requirements.
+pip install waifulab
 The loaded image should be in the folder /data (?)
 Running it on command line(?)
 
 ## Dependencies
-
 * Python >= 3.6
 * pytorch >= 1.4.0
 * dlib >= 19.19
 * opencv-python >= 4.1.0.30
 * pillow >= 7.0.0
 * numpy >= 1.17.l2
+* waifulabs
 
 If you install these packages, you should be all good.
 
