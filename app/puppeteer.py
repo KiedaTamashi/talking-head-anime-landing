@@ -3,7 +3,8 @@ import sys
 
 sys.path.append(os.getcwd())
 
-from tkinter import Tk, Frame, LEFT, Label, BOTH, GROOVE, Button, filedialog, PhotoImage, messagebox
+from tkinter import Tk, Frame, LEFT, Label, BOTH, GROOVE, Button, filedialog, PhotoImage, messagebox,OptionMenu, StringVar
+from SRutils.Interface import SuperResolutionModule
 
 import numpy as np
 import PIL.Image
@@ -11,6 +12,7 @@ import PIL.ImageTk
 import cv2
 import dlib
 import torch
+from torchvision.transforms import ToPILImage
 
 from poser.morph_rotate_combine_poser import MorphRotateCombinePoser256Param6
 from puppet.head_pose_solver import HeadPoseSolver
@@ -41,7 +43,9 @@ class PuppeteerApp:
         self.video_capture = video_capture
         self.torch_device = torch_device
         self.head_pose_solver = HeadPoseSolver()
-
+        self.isSuperResolution = StringVar(self.master)
+        self.isSuperResolution.set("SR-False")
+        self.SuperResolution = SuperResolutionModule()
         self.master.title("Puppeteer")
         self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -49,7 +53,7 @@ class PuppeteerApp:
         top_frame.pack()
 
         if True:
-            source_image_frame = Frame(top_frame, width=256, height=256)
+            source_image_frame = Frame(top_frame, width=512, height=512) # change box size *2
             source_image_frame.pack_propagate(0)
             source_image_frame.pack(side=LEFT)
 
@@ -57,7 +61,7 @@ class PuppeteerApp:
             self.source_image_label.pack(fill=BOTH, expand=True)
 
         if True:
-            control_frame = Frame(top_frame, width=256, height=192)
+            control_frame = Frame(top_frame, width=512, height=192)  # change box size *2
             control_frame.pack_propagate(0)
             control_frame.pack(side=LEFT)
 
@@ -65,7 +69,7 @@ class PuppeteerApp:
             self.video_capture_label.pack(fill=BOTH, expand=True)
 
         if True:
-            posed_image_frame = Frame(top_frame, width=256, height=256)
+            posed_image_frame = Frame(top_frame, width=512, height=512) # change box size *2
             posed_image_frame.pack_propagate(0)
             posed_image_frame.pack(side=LEFT, fill='y')
 
@@ -74,6 +78,11 @@ class PuppeteerApp:
 
         bottom_frame = Frame(self.master)
         bottom_frame.pack(fill='x')
+
+        self.super_resolution_check_button = OptionMenu(bottom_frame,self.isSuperResolution,
+                                                        "              SR-True               ", # Shitcode..
+                                                        "              SR-False              ")
+        self.super_resolution_check_button.pack(fill='x')
 
         self.load_source_image_button = Button(bottom_frame, text="Load Image ...", relief=GROOVE,
                                                command=self.load_image)
@@ -229,7 +238,12 @@ class PuppeteerApp:
             # TODO Core of demo, compress this
             posed_image = self.poser.pose(self.source_image, self.current_pose).detach().cpu()
             numpy_image = rgba_to_numpy_image(posed_image[0])
-            pil_image = PIL.Image.fromarray(np.uint8(np.rint(numpy_image * 255.0)), mode='RGBA')
+            if self.isSuperResolution.get().strip() == "SR-True":
+                pil_image = PIL.Image.fromarray(np.uint8(np.rint(numpy_image * 255.0)), mode='RGBA')
+                pil_image = self.SuperResolution.inference(pil_image)
+            else:
+                pil_image = PIL.Image.fromarray(np.uint8(np.rint(numpy_image * 255.0)), mode='RGBA')
+
             photo_image = PIL.ImageTk.PhotoImage(image=pil_image)
             self.posed_image_label.configure(image=photo_image, text="")
             self.posed_image_label.image = photo_image
