@@ -274,15 +274,15 @@ if __name__ == "__main__":
     cuda = torch.device('cuda')
     poser = MorphRotateCombinePoser256Param6(
         morph_module_spec=FaceMorpherSpec(),
-        morph_module_file_name="E:/work/pycharm_v2/talking-head-anime-landing/data/face_morpher.pt",
+        morph_module_file_name="data/face_morpher.pt",
         rotate_module_spec=TwoAlgoFaceRotatorSpec(),
-        rotate_module_file_name="E:/work/pycharm_v2/talking-head-anime-landing/data/two_algo_face_rotator.pt",
+        rotate_module_file_name="data/two_algo_face_rotator.pt",
         combine_module_spec=CombinerSpec(),
-        combine_module_file_name="E:/work/pycharm_v2/talking-head-anime-landing/data/combiner.pt",
+        combine_module_file_name="data/combiner.pt",
         device=cuda)
 
     face_detector = dlib.get_frontal_face_detector()
-    landmark_locator = dlib.shape_predictor("E:/work/pycharm_v2/talking-head-anime-landing/data/shape_predictor_68_face_landmarks.dat")
+    landmark_locator = dlib.shape_predictor("data/shape_predictor_68_face_landmarks.dat")
 
     video_capture = cv2.VideoCapture(0)
 
