@@ -1,0 +1,7 @@
+Since the end-to-end backbone we use limits the shape of output as (256,256), if advanced users with better
+hardware want higher resolution, we also offer a post-processing super-resolution option. By changing the attribute of
+drop-down menu, the user can switch between normal and SR mode. All post-processing is transparent to the user and
+responses in real time.
+
+For the backend, we use state-of-the-art SR model DCSCN, which is known for efficiency. The pretrained model is based
+on the anime character dataset and achieved excellent performance with real-time processing for video stream on GTX 2070.
