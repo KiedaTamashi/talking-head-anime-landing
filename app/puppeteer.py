@@ -28,6 +28,21 @@ import waifulabs
 import io
 import os
 
+import PIL.Image
+import dlib
+import numpy as np
+from PIL import ImageFile
+import cv2
+import matplotlib.pyplot as plt
+
+try:
+    import face_recognition_models
+except Exception:
+    print("Installing `face_recognition_models` with this command before using `face_recognition`:\n")
+    print("pip install git+https://github.com/ageitgey/face_recognition_models")
+    quit()
+
+
 class PuppeteerApp:
     def __init__(self,
                  master,
@@ -196,7 +211,7 @@ class PuppeteerApp:
         face_landmarks = None
         if len(faces) > 0:
             face_rect = faces[0]
-            face_landmarks = self.landmark_locator(rgb_frame, face_rect)
+            face_landmarks = self.landmark_locator(rgb_frame, face_rect.rect)
             face_box_points, euler_angles = self.head_pose_solver.solve_head_pose(face_landmarks)
             self.draw_face_landmarks(rgb_frame, face_landmarks)
             self.draw_face_box(rgb_frame, face_box_points)
@@ -281,7 +296,10 @@ if __name__ == "__main__":
         combine_module_file_name="data/combiner.pt",
         device=cuda)
 
-    face_detector = dlib.get_frontal_face_detector()
+    # face_detector = dlib.get_frontal_face_detector()
+    cnn_face_detection_model = face_recognition_models.cnn_face_detector_model_location()
+    face_detector = dlib.cnn_face_detection_model_v1(cnn_face_detection_model)
+
     landmark_locator = dlib.shape_predictor("data/shape_predictor_68_face_landmarks.dat")
 
     video_capture = cv2.VideoCapture(0)
