@@ -13,6 +13,7 @@ import cv2
 import dlib
 import torch
 from torchvision.transforms import ToPILImage
+import argparse
 
 from poser.morph_rotate_combine_poser import MorphRotateCombinePoser256Param6
 from puppet.head_pose_solver import HeadPoseSolver
@@ -50,7 +51,9 @@ class PuppeteerApp:
                  face_detector,
                  landmark_locator,
                  video_capture,
-                 torch_device: torch.device):
+                 torch_device: torch.device,
+                 model):
+        self.model = model
         self.master = master
         self.poser = poser
         self.face_detector = face_detector
@@ -211,7 +214,10 @@ class PuppeteerApp:
         face_landmarks = None
         if len(faces) > 0:
             face_rect = faces[0]
-            face_landmarks = self.landmark_locator(rgb_frame, face_rect.rect)
+            if self.model == "HOG":
+                face_landmarks = self.landmark_locator(rgb_frame, face_rect)
+            else:
+                face_landmarks = self.landmark_locator(rgb_frame, face_rect.rect)
             face_box_points, euler_angles = self.head_pose_solver.solve_head_pose(face_landmarks)
             self.draw_face_landmarks(rgb_frame, face_landmarks)
             self.draw_face_box(rgb_frame, face_box_points)
@@ -286,6 +292,10 @@ class PuppeteerApp:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Choose the model')
+    parser.add_argument('-model', default="HOG")
+    args = parser.parse_args()
+
     cuda = torch.device('cuda')
     poser = MorphRotateCombinePoser256Param6(
         morph_module_spec=FaceMorpherSpec(),
@@ -296,14 +306,16 @@ if __name__ == "__main__":
         combine_module_file_name="data/combiner.pt",
         device=cuda)
 
-    # face_detector = dlib.get_frontal_face_detector()
-    cnn_face_detection_model = face_recognition_models.cnn_face_detector_model_location()
-    face_detector = dlib.cnn_face_detection_model_v1(cnn_face_detection_model)
+    if args.model == "HOG":
+        face_detector = dlib.get_frontal_face_detector()
+    else:
+        cnn_face_detection_model = face_recognition_models.cnn_face_detector_model_location()
+        face_detector = dlib.cnn_face_detection_model_v1(cnn_face_detection_model)
 
     landmark_locator = dlib.shape_predictor("data/shape_predictor_68_face_landmarks.dat")
 
     video_capture = cv2.VideoCapture(0)
 
     master = Tk()
-    PuppeteerApp(master, poser, face_detector, landmark_locator, video_capture, cuda)
+    PuppeteerApp(master, poser, face_detector, landmark_locator, video_capture, cuda, args.model)
     master.mainloop()
