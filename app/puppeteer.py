@@ -4,7 +4,7 @@ import sys
 sys.path.append(os.getcwd())
 
 from tkinter import Tk, Frame, LEFT, Label, BOTH, GROOVE, Button, filedialog, PhotoImage, messagebox,OptionMenu, StringVar
-from SRutils.Interface import SuperResolutionModule
+from SRutils.Interface import SuperResolutionModule,transparent_back
 
 import numpy as np
 import PIL.Image
@@ -262,6 +262,7 @@ class PuppeteerApp:
             if self.isSuperResolution.get().strip() == "SR-True":
                 pil_image = PIL.Image.fromarray(np.uint8(np.rint(numpy_image * 255.0)), mode='RGBA')
                 pil_image = self.SuperResolution.inference(pil_image)
+                pil_image = transparent_back(pil_image)
             else:
                 pil_image = PIL.Image.fromarray(np.uint8(np.rint(numpy_image * 255.0)), mode='RGBA')
 
