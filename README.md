@@ -11,11 +11,6 @@ As with many modern machine learning projects written with PyTorch, this piece o
 
 Also, the peppeteer tool requires a webcam.
 
-## Preprocessing Requirements.
-pip install waifulab
-The loaded image should be in the folder /data (?)
-Running it on command line(?)
-
 ## Dependencies
 * Python >= 3.6
 * pytorch >= 1.4.0
@@ -65,15 +60,6 @@ Once the downloading is done, the data directory should look like the following:
   - shape_predictor_68_face_landmarks.dat
   - two_algo_face_rotator.pt
 ```
-
-To play with the demo, you can use the 5 images I included in the `data/illust`. Or, you can prepare some character images by yourself. Images that can be animated must satisfy the following requirements:
-* It must be in PNG format.
-* It must be of size 256 x 256.
-* The head of the character must be contained in the center 128 x 128 box.
-* It must have 4 channels (RGBA).
-* Pixels that do not belong to the character's body must have value (0,0,0,0). In other words, the background must be transparent.
-
-For more details, consult Section 4 of the [web site of the project writeup](https://pkhungurn.github.io/talking-head-anime/). You should save all the images in the `data/illust` directory. One good way to get character images is to generate one with [Waifu Labs](https://waifulabs.com/) and edit the image to fit the above requirements.
 
 ## Running the Program
 
