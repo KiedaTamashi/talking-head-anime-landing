@@ -29,6 +29,7 @@ Run the application by simple two line, and you will see a user-friendly UI.
 * pillow >= 7.0.0
 * numpy >= 1.17.l2
 * waifulabs
+
 ------------------------------------------Following is the original guide-----------------------------------------------
 
 ## Recreating Python Environment with Anaconda
