@@ -1,6 +1,8 @@
 from torchvision.utils import save_image
 import time
-from utils.prepare_images import *
+from Waifu2x.utils.prepare_images import *
+from Waifu2x.Models import DCSCN
+import torch
 
 lr = "./benchmark/miku_small.png"
 def DCSCN_infer():

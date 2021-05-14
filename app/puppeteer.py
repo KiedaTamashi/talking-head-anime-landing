@@ -291,6 +291,34 @@ class PuppeteerApp:
             y = part.y
             cv2.rectangle(frame, (x - 1, y - 1), (x + 1, y + 1), (0, 255, 0), thickness=2)
 
+def run():
+    parser = argparse.ArgumentParser(description='Choose the model')
+    parser.add_argument('-model', default="HOG")
+    args = parser.parse_args()
+
+    cuda = torch.device('cuda')
+    poser = MorphRotateCombinePoser256Param6(
+        morph_module_spec=FaceMorpherSpec(),
+        morph_module_file_name="data/face_morpher.pt",
+        rotate_module_spec=TwoAlgoFaceRotatorSpec(),
+        rotate_module_file_name="data/two_algo_face_rotator.pt",
+        combine_module_spec=CombinerSpec(),
+        combine_module_file_name="data/combiner.pt",
+        device=cuda)
+
+    if args.model == "HOG":
+        face_detector = dlib.get_frontal_face_detector()
+    else:
+        cnn_face_detection_model = face_recognition_models.cnn_face_detector_model_location()
+        face_detector = dlib.cnn_face_detection_model_v1(cnn_face_detection_model)
+
+    landmark_locator = dlib.shape_predictor("data/shape_predictor_68_face_landmarks.dat")
+
+    video_capture = cv2.VideoCapture(0)
+
+    master = Tk()
+    PuppeteerApp(master, poser, face_detector, landmark_locator, video_capture, cuda, args.model)
+    master.mainloop()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Choose the model')

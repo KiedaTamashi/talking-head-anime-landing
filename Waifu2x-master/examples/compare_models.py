@@ -2,21 +2,21 @@ import time
 from multiprocessing import Pool, cpu_count
 
 from torchvision.utils import save_image
-from Models import *
+from Waifu2x.Models import *
 from utils.prepare_images import *
-
+import torch
 model_dcscn = DCSCN()
-model_dcscn.load_state_dict(torch.load("model_check_points/DCSCN/DCSCN_weights_387epos_L12_noise_1.pt"))
+model_dcscn.load_state_dict(torch.load("../model_check_points/DCSCN/DCSCN_weights_387epos_L12_noise_1.pt"))
 
 model_upconv7 = UpConv_7()
-model_upconv7.load_pre_train_weights("model_check_points/Upconv_7/noise1_scale2.0x_model.json")
+model_upconv7.load_pre_train_weights("../model_check_points/Upconv_7/noise1_scale2.0x_model.json")
 
 model_cran_v2 = CARN_V2(color_channels=3, mid_channels=64, conv=nn.Conv2d,
                         single_conv_size=3, single_conv_group=1,
                         scale=2, activation=nn.LeakyReLU(0.1),
                         SEBlock=True, repeat_blocks=3, atrous=(1, 1, 1))
 model_cran_v2 = network_to_half(model_cran_v2)
-model_cran_v2.load_state_dict(torch.load("model_check_points/CRAN_V2/CARN_model_checkpoint.pt", 'cpu'))
+model_cran_v2.load_state_dict(torch.load("../model_check_points/CRAN_V2/CARN_model_checkpoint.pt", 'cpu'))
 model_cran_v2 = model_cran_v2.float()
 # demo_img = 'demo/demo_imgs/sp_twitter_icon_ao_3.png'
 demo_img = "dataset/sp_twitter/sp_twitter_icon_ao_3.png"
