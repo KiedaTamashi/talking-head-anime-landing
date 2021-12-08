@@ -282,7 +282,7 @@ class PuppeteerApp:
                       [4, 5], [5, 6], [6, 7], [7, 4],
                       [0, 4], [1, 5], [2, 6], [3, 7]]
         for start, end in line_pairs:
-            cv2.line(frame, face_box_points[start], face_box_points[end], (255, 0, 0), thickness=2)
+            cv2.line(frame, int(face_box_points[start]), int(face_box_points[end]), (255, 0, 0), thickness=2)
 
     def draw_face_landmarks(self, frame, face_landmarks):
         for i in range(68):
